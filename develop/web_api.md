@@ -23,13 +23,21 @@
 </ul>
 </li>
 <li><a href="#group">Group</a><ul>
-<li><a href="#list-groups">List Groups</a></li>
-<li><a href="#add-a-group">Add A Group</a></li>
-<li><a href="#delete-group">Delete Group</a></li>
-<li><a href="#rename-group">Rename Group</a></li>
+<li><a href="#list-all-groups">List All Groups</a></li>
+<li><a href="#add-a-group">Add a Group</a></li>
+<li><a href="#get-info-of-a-group">Get Info of a Group</a></li>
+<li><a href="#rename-a-group">Rename a Group</a></li>
+<li><a href="#transfer-a-group">Transfer a Group</a></li>
+<li><a href="#delete-a-group">Delete a Group</a></li>
+</ul>
+</li>
 <li><a href="#group-member">Group Member</a><ul>
-<li><a href="#add-a-group-member">Add A Group Member</a></li>
-<li><a href="#delete-a-group-member">Delete A Group Member</a></li>
+<li><a href="#list-all-group-members">List All Group Members</a></li>
+<li><a href="#add-a-group-member">Add a Group Member</a></li>
+<li><a href="#get-info-of-a-group-member">Get Info of a Group Member</a></li>
+<li><a href="#set-a-group-member-admin">Set a Group Member Admin</a></li>
+<li><a href="#unset-a-group-member-admin">Unset a Group Member Admin</a></li>
+<li><a href="#delete-a-group-member">Delete a Group Member</a></li>
 </ul>
 </li>
 <li><a href="#group-message">Group Message</a><ul>
@@ -513,154 +521,356 @@ Sample response from a seafile pro edition server:
 
 * 400 `repo_id` or `p` is missing, or `p` is not valid file path(e.g. /foo/bar/).
 
-
-
 ## <a id="group"></a>Group ##
 
-### <a id="list-groups"></a>List Groups ###
+### <a id="list-all-groups"></a>List All Groups ###
 
-**GET** https://cloud.seafile.com/api2/groups/
+**GET** https://cloud.seafile.com/api/v2.1/groups/
 
+**Request parameters**
+
+* avatar_size
+* with_repos (0 or 1, if return library info of group. default 0 not return)
 
 **Sample request**
 
-    curl -H 'Authorization: Token f2210dacd9c6ccb8133606d94ff8e61d99b477fd' "https://cloud.seafile.com/api2/groups/"
+```
+curl -H 'Authorization: Token f2210dacd9c6ccb8133606d94ff8e61d99b477fd' "https://cloud.seafile.com/api/v2.1/groups/?with_repos=1&avatar_size=32"
+```
 
 **Sample response**
 
+```
+[
     {
-        "replynum": 0,
-        "groups": [
+        "name": "group-1",
+        "owner": "1@1.com",
+        "created_at": "2015-12-10T16:07:47+0800",
+        "admins": [
+            "lian@lian.com",
+            "1@1.com"
+        ],
+        "avatar_url": "https://cloud.seafile.com/media/avatars/groups/770/resized/32/07b7c5e749910f99d638439c5aa76bca.png",
+
+        "id": 770,
+        "repos": [
             {
-                "ctime": 1398134171327948,
-                "creator": "user@example.com",
-                "msgnum": 0,
-                "mtime": 1398231100,
-                "id": 1,
-                "name": "lian"
-            },
-            {
-                "ctime": 1398236081042441,
-                "creator": "user@example.com",
-                "msgnum": 0,
-                "mtime": 0,
-                "id": 2,
-                "name": "123"
+                "owner_nickname": "hahahah",
+                "permission": "rw",
+                "encrypted": false,
+                "mtime_relative": "<time datetime=\"2015-12-14T14:22:26\" is=\"relative-time\" title=\"Mon, 14 Dec 2015 14:22:26 +0800\" >21 hours ago</time>",
+                "mtime": 1450074146,
+                "owner": "lian@lian.com",
+                "id": "fd26a75a-6bbf-4c05-a3a9-62bec7c322cb",
+                "size": 516259163,
+                "name": "test",
+                "share_from_me": true,
+                "desc": "",
+                "size_formatted": "492.3 MB"
             }
         ]
+    },
+    {
+        "name": "group-2",
+        "owner": "lian@lian.com",
+        "created_at": "2015-12-11T17:13:10+0800",
+        "admins": [
+            "lian@lian.com"
+        ],
+        "avatar_url": "https://cloud.seafile.com/media/avatars/groups/default.png",
+        "id": 772
     }
+]
+```
 
-### <a id="add-a-group"></a>Add A Group ###
+### <a id="add-a-group"></a>Add a Group ###
 
-**PUT** https://cloud.seafile.com/api2/groups/
+**POST** https://cloud.seafile.com/api/v2.1/groups/
 
 **Request parameters**
 
-* group_name
+* name (name of new group)
 
 **Sample request**
 
-    curl -X PUT -d "group_name=newgroup" -H 'Authorization: Token f2210dacd9c6ccb8133606d94ff8e61d99b477fd' "https://cloud.seafile.com/api2/groups/"
+```
+curl -d "name=new_group_name" -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/
+```
 
 **Sample response**
 
-    {"group_id": 3, "success": true}
+```
+{
+    "name":"new_group_name",
+    "owner":"lian@lian.com",
+    "created_at":"2015-12-17T10:29:57+0800",
+    "admins":["lian@lian.com"],
+    "avatar_url":"https://cloud.seafile.com/media/avatars/groups/default.png",
+    "id":773
+}
+```
 
-**Errors**
+### <a id="get-info-of-a-group"></a>Get Info of a Group ###
 
-* 400 There is already a group with that name.
-
-### <a id="delete-group"></a>Delete Group ###
-
-**DELETE** https://cloud.seafile.com/api2/groups/{group_id}/
-
-**Request parameters**
-
-None
-
-**Sample request**
-
-    curl -X DELETE -H 'Authorization: Token f2210dacd9c6ccb8133606d94ff8e61d99b477fd' "https://cloud.seafile.com/api2/groups/1/"
-
-**Success**
-
-200 if everything is fine.
-
-**Errors**
-
-* 400 if ad group id format
-* 404 if Group not found
-* 403 if Forbid to delete group
-* 520 if Failed to remove group (generic error)
-
-### <a id="rename-group"></a>Rename Group
-
-**POST** https://cloud.seafile.com/api2/groups/{group_id}/
+**GET** https://cloud.seafile.com/api/v2.1/groups/772/
 
 **Request parameters**
 
-* operation (value must be 'rename')
-* newname (the new name for the group)
+* avatar_size
+* with_repos (0 or 1, if return library info of group. default 0 not return)
 
 **Sample request**
 
-    curl -d "operation=rename&newname=pinkfloyd_lovers" -H 'Authorization: Token f2210dacd9c6ccb8133606d94ff8e61d99b477fd' "https://cloud.seafile.com/api2/groups/1/"
-
-**Success**
-
-   200 if everything is fine.
-
-**Errors**
-
-* 404 if Group not found
-* 403 if Forbid to rename group
-* 400 if Newname is missing or if Group name is not valid of if There is already a group with that name or Operation can only be rename.
-
-### <a id="group-member"></a>Group Member ###
-
-#### <a id="add-a-group-member"></a>Add A Group Member ####
-
-**PUT** https://cloud.seafile.com/api2/groups/{group_id}/members/
-
-**Request parameters**
-
-* user_name
-
-**Sample request**
-
-    curl -X PUT -d "user_name=user@example.com"-H 'Authorization: Token f2210dacd9c6ccb8133606d94ff8e61d99b477fd' "https://cloud.seafile.com/api2/groups/1/members/"
+```
+curl -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/772/
+```
 
 **Sample response**
 
-    {"success": true}
+```
+{
+    "name":"rename_group_name",
+    "owner":"lian@lian.com",
+    "created_at":"2015-12-17T10:29:57+0800",
+    "admins":["lian@lian.com"],
+    "avatar_url":"https://cloud.seafile.com/media/avatars/groups/default.png",
+    "id":772
+}
+```
 
-**Errors**
+### <a id="rename-a-group"></a>Rename a Group ###
 
-* 400 invalid group id
-* 403 only administrators can add group members
-* 404 unable to find group
-
-#### <a id="delete-a-group-member"></a>Delete A Group Member ####
-
-**DELETE** https://cloud.seafile.com/api2/groups/{group_id}/members/
+**PUT** https://cloud.seafile.com/api/v2.1/groups/772/
 
 **Request parameters**
 
-* user_name
+* name (name of new group)
 
 **Sample request**
 
-    curl -X DELETE -d "user_name=user@example.com" -H 'Authorization: Token f2210dacd9c6ccb8133606d94ff8e61d99b477fd' "https://cloud.seafile.com/api2/groups/1/members/"
+```
+curl -X PUT -d "name=rename_group_name" -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/772/
+```
 
 **Sample response**
 
-    {"success": true}
+```
+{
+    "name":"rename_group_name",
+    "owner":"lian@lian.com",
+    "created_at":"2015-12-17T10:29:57+0800",
+    "admins":["lian@lian.com"],
+    "avatar_url":"https://cloud.seafile.com/media/avatars/groups/default.png",
+    "id":772
+}
+```
 
-**Errors**
+### <a id="transfer-a-group"></a> Transfer a Group ###
 
-* 400 invalid group id
-* 403 only administrators can remove group members
-* 404 unable to find group
+**PUT** https://cloud.seafile.com/api/v2.1/groups/772/
+
+**Request parameters**
+
+* owner (new owner of this group, should be an email.)
+
+**Sample request**
+
+```
+curl -X PUT -d "owner=new_owner@new_owner.com" -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/772/
+```
+
+**Sample response**
+
+```
+{
+    "name":"rename_group_name",
+    "owner":"new_owner@new_owner.com",
+    "created_at":"2015-12-17T10:29:57+0800",
+    "admins":["lian@lian.com", "new_owner@new_owner.com"],
+    "avatar_url":"https://cloud.seafile.com/media/avatars/groups/default.png",
+    "id":772
+}
+```
+
+### <a id="delete-a-group"></a> Delete a Group ###
+
+**DELETE** https://cloud.seafile.com/api/v2.1/groups/772/
+
+**Sample request**
+
+```
+curl -X DELETE -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/772/
+```
+
+**Sample response**
+
+```
+{"success":true}
+```
+
+## <a id="group-member"></a>Group Member##
+
+### <a id="list-all-group-members"></a>List All Group Members ###
+
+**GET** https://cloud.seafile.com/api/v2.1/groups/770/members/
+
+**Request parameters**
+
+* avatar_size
+* is_admin (`true` or `false`, if ONLY return admin members of group. default `false` return all members)
+
+**Sample request**
+
+```
+curl -H 'Authorization: Token f2210dacd9c6ccb8133606d94ff8e61d99b477fd' "https://cloud.seafile.com/api/v2.1/groups/770/members/"
+```
+
+**Sample response**
+
+```
+[
+    {
+        "login_id": "",
+        "name": "nickname-of-lian",
+        "avatar_url": "https://cloud.seafile.com/media/avatars/default.png",
+        "is_admin": true,
+        "contact_email": "lian_contact@email.com",
+        "email": "lian@lian.com"
+    },
+    {
+        "login_id": "",
+        "name": "1",
+        "avatar_url": "https://cloud.seafile.com/media/avatars/default.png",
+        "is_admin": false,
+        "contact_email": "1@1.com",
+        "email": "1@1.com"
+    }
+]
+```
+
+### <a id="add-a-group-member"></a>Add a Group Member###
+
+**POST** https://cloud.seafile.com/api/v2.1/groups/770/members/
+
+**Request parameters**
+
+* email
+
+**Sample request**
+
+```
+curl -d "email=new_member@new_member.com" -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/770/members/
+```
+
+**Sample response**
+
+```
+{
+    "login_id": "",
+    "name": "new_member",
+    "avatar_url": "https://cloud.seafile.com/media/avatars/default.png",
+    "is_admin": false,
+    "contact_email": "new_member@new_member.com",
+    "email": "new_member@new_member.com"
+}
+```
+
+### <a id="get-info-of-a-group-member"></a>Get Info of a Group Member###
+
+**GET** https://cloud.seafile.com/api/v2.1/groups/770/members/group-member@group-member.com/
+
+**Sample request**
+
+```
+curl -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/770/members/group-member@group-member.com/
+```
+
+**Request parameters**
+
+* avatar_size
+
+**Sample response**
+
+```
+{
+    "login_id": "",
+    "name": "group-member",
+    "avatar_url": "https://cloud.seafile.com/media/avatars/default.png",
+    "is_admin": false,
+    "contact_email": "group-member@group-member.com",
+    "email": "group-member@group-member.com"
+}
+```
+
+### <a id="set-a-group-member-admin"></a>Set a Group Member Admin ###
+
+**PUT** https://cloud.seafile.com/api/v2.1/groups/770/members/group-member@group-member.com/
+
+**Request parameters**
+
+* is_admin=true
+
+**Sample request**
+
+```
+curl -X PUT -d "is_admin=true" -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/770/members/group-member@group-member.com/
+```
+
+**Sample response**
+
+```
+{
+    "login_id": "",
+    "name": "group-member",
+    "avatar_url": "https://cloud.seafile.com/media/avatars/default.png",
+    "is_admin": true,
+    "contact_email": "group-member@group-member.com",
+    "email": "group-member@group-member.com"
+}
+```
+
+### <a id="unset-a-group-member-admin"></a>Unset a Group Member Admin ###
+
+**PUT** https://cloud.seafile.com/api/v2.1/groups/770/members/group-member@group-member.com/
+
+**Request parameters**
+
+* is_admin=false
+
+**Sample request**
+
+```
+curl -X PUT -d "is_admin=false" -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/770/members/group-member@group-member.com/
+```
+
+**Sample response**
+
+```
+{
+    "login_id": "",
+    "name": "group-member",
+    "avatar_url": "https://cloud.seafile.com/media/avatars/default.png",
+    "is_admin": false,
+    "contact_email": "group-member@group-member.com",
+    "email": "group-member@group-member.com"
+}
+```
+
+### <a id="delete-a-group-member"></a> Delete a Group Member ###
+
+**DELETE** https://cloud.seafile.com/api/v2.1/groups/770/members/group-member@group-member.com/
+
+**Sample request**
+
+```
+curl -X DELETE -H 'Authorization: Token 444d2bbf1fc78ffbeedc4704c9f41e32d926ac94' https://cloud.seafile.com/api/v2.1/groups/770/members/group-member@group-member.com/
+```
+
+**Sample response**
+
+```
+{"success":true}
+```
 
 ### <a id="group-message"></a>Group Message ###
 
